@@ -10,9 +10,11 @@ class Grid:
 	cantWalk = Back.WHITE
 	inRange = Back.GREEN
 	outRange = Back.RED
+	containsSource = Back.YELLOW
 	
 	
 	
+	moveRange = []
 	height,width = None,None
 	characterValues = {}
 	grid = []
@@ -35,7 +37,6 @@ class Grid:
 		
 		valueLines = []
 		for line in fLines:
-			print(line)
 			valueLines.append(line.strip("\n"))
 		
 		for line in valueLines:
@@ -70,6 +71,8 @@ class Grid:
 		
 	def addSource(self,x,y,movePoints,name):
 		self.sources[name] = Source(x,y,movePoints,name)
+		self.grid[y][x].setColor(self.containsSource)
+		
 		
 	def removeSource(self,name):
 		self.sources.pop(name)
@@ -80,6 +83,10 @@ class Grid:
 		x = s.x
 		y = s.y
 		
+		self.moveRange = []
+		self.moveRange.append([x,y])
+		
+		
 		self.fill(x-1,y,movePoints)
 		self.fill(x+1,y,movePoints)
 		self.fill(x,y+1,movePoints)
@@ -89,8 +96,10 @@ class Grid:
 		self.fill(x+1,y+1,movePoints)
 		self.fill(x-1,y+1,movePoints)
 		self.fill(x+1,y-1,movePoints)
-		
-		self.grid[y][x].setColor(Back.YELLOW)	
+
+		self.resetColor()
+		self.fillColor()
+		self.grid[y][x].setColor(self.containsSource)	
 		
 	def fill(self,x,y,movePoints): 
 		xIsInBounds = x>=0 and x < self.width
@@ -99,7 +108,8 @@ class Grid:
 			p = self.grid[y][x]
 			if p.walkValue != None:
 				if movePoints >= p.walkValue:
-					self.grid[y][x].setColor(self.inRange)
+					
+					self.moveRange.append([x,y])
 					movePoints -= p.walkValue
 					self.fill(x-1,y,movePoints)
 					self.fill(x+1,y,movePoints)
@@ -110,6 +120,36 @@ class Grid:
 					self.fill(x+1,y+1,movePoints)
 					self.fill(x-1,y+1,movePoints)
 					self.fill(x+1,y-1,movePoints)
+					
+	def fillColor(self):
+		for coord in self.moveRange:
+			x = coord[0]
+			y = coord[1]
+			self.grid[y][x].setColor(self.inRange)
+		
+	def resetColor(self):
+		for row in self.grid:
+			for point in row:
+				if point.walkValue == None:
+					point.setColor(self.cantWalk)
+				else:
+					point.setColor(self.canWalk)	
+		
+	def isInRange(self,x,y):
+		if [x,y] in self.moveRange:
+			print("true")
+			return True
+		else:
+			return False
+			
+	
+	def getPoint(self,x,y):
+		return self.grid[y][x]
+		
+	def moveSource(self,name,x,y):
+		if self.isInRange(x,y):
+			self.sources[name].moveTo(x,y)
+		
 			
 				
 		

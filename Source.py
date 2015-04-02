@@ -11,3 +11,7 @@ class Source:
 		self.y = ny
 		self.movePoints = nMove
 		self.name = nName
+	
+	def moveTo(self,nX,nY):
+		self.x = nX
+		self.y = nY
